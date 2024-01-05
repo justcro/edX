@@ -4,6 +4,7 @@
 # In[ ]:
 
 
+
 import dash
 from dash import dcc
 from dash import html
@@ -52,8 +53,8 @@ app.layout = html.Div([
             placeholder= 'Select year'
         ),
     
-    html.Div(id='output-container', className='chart-grid', style={'display': 'flex'}),])
-])
+    html.Div([html.Div(id='output-container', className='chart-grid', style={'display': 'flex'}),])
+])])
 #TASK 2.4: Creating Callbacks
 # Define the callback function to update the input container based on the selected statistics
 @app.callback(
@@ -61,7 +62,10 @@ app.layout = html.Div([
     Input(component_id='dropdown-statistics', component_property='value'))
 
 def update_input_container(selected_statistics):
-    return selected_statistics != 'Yearly Statistics'
+    if selected_statistics == 'Yearly Statistics':
+        return False
+    else:
+        return True
 
 #Callback for plotting
 # Define the callback function to update the input container based on the selected statistics
@@ -82,12 +86,9 @@ def update_output_container(selected_year, selected_statistics):
 
 #Plot 1 Automobile sales fluctuate over Recession Period (year wise)
         # use groupby to create relevant data for plotting
-        yearly_rec=recession_data.groupby('Year')['Automobile_Sales'].mean().reset_index()
-        R_chart1 = dcc.Graph(
-            figure=px.line(yearly_rec, 
-                x='Year',
-                y='Automobile_Sales',
-                title="Average Automobile Sales fluctuation over Recession Period"))
+        yearly_rec= recession_data.groupby('Year')['Automobile_Sales'].mean().reset_index()
+        R_chart1 = dcc.Graph(figure=px.line(yearly_rec, x='Year', y='Automobile_Sales',
+        title="Average Automobile Sales fluctuation over Recession Period"))
 
 #Plot 2 Calculate the average number of vehicles sold by vehicle type       
         # use groupby to create relevant data for plotting
@@ -99,14 +100,15 @@ def update_output_container(selected_year, selected_statistics):
         # use groupby to create relevant data for plotting
         exp_rec = recession_data.groupby(['Vehicle_Type','GDP']).mean().reset_index()
         R_chart3 = dcc.Graph(figure=px.pie(exp_rec, values = 'GDP', names = 'Vehicle_Type', title = "Expenditure Share by Auto Type During Recession"))
+
 # Plot 4 bar chart for the effect of unemployment rate on vehicle type and sales
         unemployment_ts = recession_data.groupby(['Vehicle_Type', 'Automobile_Sales'])['Unemployment_Rate'].mean().reset_index()
         R_chart4 = dcc.Graph(figure=px.bar(unemployment_ts, x = ['Vehicle_Type', 'Automobile _Sales'], y = 'Unemployment_Rate'))
 
-        return html.Div([
+        return html.Div([html.Div([
             html.Div(className='chart-item', children=[html.Div(children=R_chart1),html.Div(children=R_chart2)],style={'flex'}),
             html.Div(className='chart-item', children=[html.Div(children=R_chart3),html.Div(children=R_chart4)],style={'flex'})
-            ])
+            ])])
 
 # TASK 2.6: Create and display graphs for Yearly Report Statistics
  # Yearly Statistic Report Plots                             
@@ -120,7 +122,7 @@ def update_output_container(selected_year, selected_statistics):
         Y_chart1 = dcc.Graph(figure=px.line(yas, x='Year', y = 'Automobile_Sales'))
             
 # Plot 2 Total Monthly Automobile sales using line chart.
-        mos = data.groupby('Month')['Automobile_Sales'].mean().reset_index()
+        mos = yearly_data.groupby('Month')['Automobile_Sales'].mean().reset_index()
         Y_chart2 = dcc.Graph(figure=px.line(mos, x="Month", y="Automobile_Sales"))
 
         # Plot bar chart for average number of vehicles sold during the given year
